@@ -35,10 +35,14 @@
   (λ () (error "No such slot" poo. slot)))
 
 (def (.ref poo. slot (base (no-such-slot poo. slot)))
-  (.instantiate poo.)
-  (match poo.
-    ((poo prototypes instance)
-     (hash-ensure-ref instance slot (cut compute-slot poo. prototypes slot base)))))
+  (try
+    (begin
+      (.instantiate poo.)
+      (match poo.
+        ((poo prototypes instance)
+        (hash-ensure-ref instance slot (cut compute-slot poo. prototypes slot base)))))
+    (catch (err)
+      (error (error-message err) slot))))
 
 (def (compute-slot poo. prototypes slot base)
   (match prototypes
@@ -253,8 +257,12 @@
    (.putslot! poo 'slot (poo/slot-init-form poo (slot slots ...) slot slotspec ...))))
 
 (def (.put! poo. slot value) ;; TODO: check instance mutability status first
-  (.instantiate poo.)
-  (hash-put! (poo-instance poo.) slot value))
+  (try
+    (begin
+      (.instantiate poo.)
+      (hash-put! (poo-instance poo.) slot value))
+    (catch (err)
+      (error (error-message err) slot))))
 
 (defrules .set! () ((_ poo. slot value) (.put! poo. 'slot value)))
 
